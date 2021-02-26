@@ -13,8 +13,6 @@
 #include "shell.h"
 #include "util.h"
 
-void cleanup();
-
 int main(int argc, char *argv[]) {
     atexit(cleanup);
     SM_init();
@@ -37,48 +35,13 @@ int main(int argc, char *argv[]) {
         cleanupWords(words);
 
         if (errorCode == -1) {
+            SM_cleanup();
             free(inputBuffer);
             printf("Bye!\n");
-            exit(EXIT_SUCCESS);
+            return EXIT_SUCCESS;
         }
         displayError(errorCode);
     }
-}
-
-char** parseInput(char ui[]) {
-    char tmp[200];
-    char **words = (char**) malloc(sizeof(char*) * MAX_WORD_COUNT);
-    int a,b;      // Char index in ui and word
-    int w = 0;  // Word counter
-
-    for (a = 0; ui[a] == ' ' && a < USER_INPUT_BUFFER_SIZE; a++);  // Skip spaces
-
-    while (ui[a] != '\0' && a < USER_INPUT_BUFFER_SIZE) {
-        for (b = 0; ui[a] != '\0' && ui[a]!= ' ' && ui[a]!= '\n' && a < USER_INPUT_BUFFER_SIZE; a++, b++) {
-            tmp[b] = ui[a];
-        }
-        tmp[b] = '\0';
-        words[w] = strdup(tmp);
-
-        while ((ui[a] == ' ' || ui[a] == '\n') && a < USER_INPUT_BUFFER_SIZE) a++;
-        w++;
-    }
-
-    return words;
-}
-
-// Frees the memory of an array of words
-void cleanupWords(char** words) {
-    for (int i = 0; i < MAX_WORD_COUNT && words[i]; i++) {
-        free(words[i]);
-        words[i] = NULL;
-    }
-    free(words); 
-    words = NULL;
-}
-
-void cleanup() {
-    SM_cleanup();
 }
 
 // Utility method to display error messages.
