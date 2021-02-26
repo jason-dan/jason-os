@@ -46,7 +46,7 @@ int interpreter(char *words[MAX_WORD_COUNT]) {    // Assumes that the input is a
     return errorCode;
 }
 
-void help() {
+void I_help() {
     printf(
         "The following commands are supported:\n"
         "help\t\t\tDisplays all the commands\n"
@@ -57,7 +57,7 @@ void help() {
     );
 }
 
-int run(char **words) {
+int I_run(char **words) {
     if (!(words[1])) return EINVAL;
 
     FILE* file = fopen(words[1], "r");
