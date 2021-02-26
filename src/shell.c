@@ -13,17 +13,14 @@
 #include "shell.h"
 #include "util.h"
 
-int main(int argc, char *argv[]) {
-    atexit(cleanup);
-    SM_init();
-    
-    const char *welcome = "Welcome to the Jason shell!\nVersion 1.0 Created January 2020\n";
-    const char *prompt = "$";
-
+int shellUI() {
     int errorCode = EXIT_SUCCESS;
+
+    SM_init();
     char *inputBuffer = (char *) malloc(sizeof(char) * USER_INPUT_BUFFER_SIZE);
 
-    printf("%s", welcome);
+    const char *welcome = "Welcome to the Jason shell!\nVersion 1.0 Created January 2020\n";
+    const char *prompt = "$";
 
     while (1) {
         printf("%s", prompt);

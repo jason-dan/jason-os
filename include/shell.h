@@ -1,6 +1,6 @@
 #ifndef SHELL_H
 #define SHELL_H
-    
+    int shellUI();                      // Main shell method
     void displayError(int error);       // Utility method to display error messages.
     
 #endif
