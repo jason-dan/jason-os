@@ -4,14 +4,12 @@
  * Jason Dan | 260718739                            *
  ****************************************************/ 
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <errno.h>
-#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "interpreter.h"
 #include "shellmemory.h"
 #include "shell.h"
-#include "util.h"
 
 int shellUI() {
     int errorCode = EXIT_SUCCESS;
@@ -19,7 +17,7 @@ int shellUI() {
     SM_init();
     char *inputBuffer = (char *) malloc(sizeof(char) * USER_INPUT_BUFFER_SIZE);
 
-    const char *welcome = "Welcome to the Jason shell!\nVersion 1.0 Created January 2020\n";
+    printf("Welcome to the Jason shell!\nShell version 2.0 Updated February 2021\n");
     const char *prompt = "$";
 
     while (1) {

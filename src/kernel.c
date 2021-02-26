@@ -7,3 +7,9 @@
  * also instantiate all the kernel data structures. *
  * Jason Dan | 260718739                            *
  ****************************************************/ 
+
+#include "shell.h"
+
+int main(int argc, char **argv) {
+    shellUI();
+}
