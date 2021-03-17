@@ -6,4 +6,4 @@
 
 #include "cpu.h"
 
-struct CPU {int IP; char IR[1000]; int quanta};
+struct CPU {int IP; char IR[1000]; int quanta;};

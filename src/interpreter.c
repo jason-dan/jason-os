@@ -22,15 +22,18 @@
 #include "interpreter.h"
 #include "shellmemory.h"
 #include "shell.h"
+#include "util.h"
+#include "kernel.h"
 
-void I_help();        // Displays list of available commands to user
-int I_run();          // Runs a script from a file
+void help();        // Displays list of available commands to user
+int run();          // Runs a script from a file
+int exec();         // executes scripts in the kernel
 
-int interpreter(char *words[MAX_WORD_COUNT]) {    // Assumes that the input is an array of words
+int interpreter(char *words[]) {    // Assumes that the input is an array of words
     int errorCode = EXIT_SUCCESS;
     
     if (strcmp(words[0], "help") == 0) {            // User requests list of possible commands
-        I_help();
+        help();
     } else if (strcmp(words[0], "quit") == 0) {     // User wishes to quit shell
         errorCode = -1;
     } else if (strcmp(words[0], "set") == 0) {      // User requests to store a variable in memory
@@ -38,7 +41,9 @@ int interpreter(char *words[MAX_WORD_COUNT]) {    // Assumes that the input is a
     } else if (strcmp(words[0], "print") == 0) {    // User requests to print variable in memory
         errorCode = SM_print(words);
     } else if (strcmp(words[0], "run") == 0) {      // User requests to run a script
-        errorCode = I_run(words);
+        errorCode = run(words);
+    } else if (strcmp(words[0], "exec") == 0) {      // User requests to run a script
+        errorCode = exec(words);
     } else {
         printf("Unknown command.\n");               // No matching command
     }
@@ -46,7 +51,7 @@ int interpreter(char *words[MAX_WORD_COUNT]) {    // Assumes that the input is a
     return errorCode;
 }
 
-void I_help() {
+void help() {
     printf(
         "The following commands are supported:\n"
         "help\t\t\tDisplays all the commands\n"
@@ -57,7 +62,7 @@ void I_help() {
     );
 }
 
-int I_run(char **words) {
+int run(char **words) {
     if (!(words[1])) return EINVAL;
 
     FILE* file = fopen(words[1], "r");
@@ -73,24 +78,55 @@ int I_run(char **words) {
     return EXIT_SUCCESS;
 }
 
+int exec(char **words) {
+    int errorCode = EXIT_SUCCESS;
+    if (!(words[1])) return EINVAL;
+
+    int scriptCounter = 1;
+    while (scriptCounter <= 3 && words[scriptCounter] && errorCode == EXIT_SUCCESS) {
+        
+        for (int i = 1; i < scriptCounter; i++) {
+            if (strcmp(words[i], words[scriptCounter]) == 0) {
+                printf("Error: Script %s already loaded.", words[scriptCounter]);
+                errorCode = EINVAL;
+            }
+        }
+
+        if (errorCode == EXIT_SUCCESS) {
+            errorCode = myinit(words[scriptCounter]);
+        }
+
+        scriptCounter++;
+    }
+
+    if (errorCode == EXIT_SUCCESS) errorCode = scheduler();
+
+}
+
 char** parseInput(char ui[]) {
     char tmp[200];
-    char **words = (char**) malloc(sizeof(char*) * MAX_WORD_COUNT);
-    int a,b;      // Char index in ui and word
+    char **words = malloc(sizeof(char*) * MAX_WORD_COUNT);
+
+    int uiPtr;  // Char ptr within input
+    int wordPtr;// Char ptr within word
     int w = 0;  // Word counter
 
-    for (a = 0; ui[a] == ' ' && a < USER_INPUT_BUFFER_SIZE; a++);  // Skip spaces
+    for (uiPtr = 0; ui[uiPtr] == ' ' && uiPtr < USER_INPUT_BUFFER_SIZE; uiPtr++);  // Skip spaces
 
-    while (ui[a] != '\0' && a < USER_INPUT_BUFFER_SIZE) {
-        for (b = 0; ui[a] != '\0' && ui[a]!= ' ' && ui[a]!= '\n' && a < USER_INPUT_BUFFER_SIZE; a++, b++) {
-            tmp[b] = ui[a];
+    while (ui[uiPtr] != '\0' && uiPtr < USER_INPUT_BUFFER_SIZE) {
+
+        for (wordPtr = 0; ui[uiPtr] != '\0' && ui[uiPtr]!= ' ' && ui[uiPtr]!= '\n' && uiPtr < USER_INPUT_BUFFER_SIZE; uiPtr++, wordPtr++) {
+            tmp[wordPtr] = ui[uiPtr];
         }
-        tmp[b] = '\0';
+
+        tmp[wordPtr] = '\0';
         words[w] = strdup(tmp);
 
-        while ((ui[a] == ' ' || ui[a] == '\n') && a < USER_INPUT_BUFFER_SIZE) a++;
+        while ((ui[uiPtr] == ' ' || ui[uiPtr] == '\n') && uiPtr < USER_INPUT_BUFFER_SIZE) uiPtr++;
         w++;
     }
+
+    words[w] = NULL;
 
     return words;
 }

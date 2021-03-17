@@ -12,8 +12,16 @@
 #include "shell.h"
 #include "pcb.h"
 #include "readyqueue.h"
+#include "kernel.h"
 
+
+int myinit(char *filename) {
+    
+}
+
+int scheduler() {}
 
 int main(int argc, char **argv) {
     shellUI();
 }
+

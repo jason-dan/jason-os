@@ -8,7 +8,7 @@
 #include "ram.h"
 
 char *ram[1000];
-char* nextFreePtr = ram;
+char* nextFreePtr = NULL;
 
 void addToRAM(FILE *p, int *start, int *end) {};
 
