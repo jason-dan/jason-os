@@ -23,14 +23,14 @@
 #include "shellmemory.h"
 #include "shell.h"
 
-void help();        // Displays list of available commands to user
-int run();          // Runs a script from a file
+void I_help();        // Displays list of available commands to user
+int I_run();          // Runs a script from a file
 
 int interpreter(char *words[MAX_WORD_COUNT]) {    // Assumes that the input is an array of words
     int errorCode = EXIT_SUCCESS;
     
     if (strcmp(words[0], "help") == 0) {            // User requests list of possible commands
-        help();
+        I_help();
     } else if (strcmp(words[0], "quit") == 0) {     // User wishes to quit shell
         errorCode = -1;
     } else if (strcmp(words[0], "set") == 0) {      // User requests to store a variable in memory
@@ -38,7 +38,7 @@ int interpreter(char *words[MAX_WORD_COUNT]) {    // Assumes that the input is a
     } else if (strcmp(words[0], "print") == 0) {    // User requests to print variable in memory
         errorCode = SM_print(words);
     } else if (strcmp(words[0], "run") == 0) {      // User requests to run a script
-        errorCode = run(words);
+        errorCode = I_run(words);
     } else {
         printf("Unknown command.\n");               // No matching command
     }
