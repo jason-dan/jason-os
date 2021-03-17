@@ -57,6 +57,18 @@ void ReadyQueue__push(PCB* pcb) {
     READY_QUEUE->size++;
 }
 
+void ReadyQueue__cleanup() {
+    if (READY_QUEUE == NULL) return;
+    
+    while (READY_QUEUE->size > 0) {
+        PCB* pcb = ReadyQueue__pop();
+        free(pcb);
+    }
+
+    free(READY_QUEUE);
+    READY_QUEUE = NULL;
+
+}
 READY_QUEUE_T* initReadyQueue() {
     READY_QUEUE_T *newQueue = malloc(sizeof(READY_QUEUE_T));
     newQueue->head = NULL;

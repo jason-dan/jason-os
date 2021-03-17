@@ -87,7 +87,7 @@ int exec(char **words) {
         
         for (int i = 1; i < scriptCounter; i++) {
             if (strcmp(words[i], words[scriptCounter]) == 0) {
-                printf("Error: Script %s already loaded.", words[scriptCounter]);
+                printf("Error: Script %s already loaded.\n", words[scriptCounter]);
                 errorCode = EINVAL;
             }
         }
@@ -100,6 +100,8 @@ int exec(char **words) {
     }
 
     if (errorCode == EXIT_SUCCESS) errorCode = scheduler();
+
+    Kernel__cleanup();
 
 }
 

@@ -3,4 +3,5 @@
     #include "pcb.h"
     PCB* ReadyQueue__pop();
     void ReadyQueue__push(PCB* pcb);
+    void ReadyQueue__cleanup();
 #endif
