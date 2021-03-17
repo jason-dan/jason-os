@@ -8,7 +8,11 @@
  * Jason Dan | 260718739                            *
  ****************************************************/ 
 
+#include <stdlib.h>
 #include "shell.h"
+#include "pcb.h"
+#include "readyqueue.h"
+
 
 int main(int argc, char **argv) {
     shellUI();
