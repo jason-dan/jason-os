@@ -9,6 +9,9 @@
 #include "pcb.h"
 
 PCB* makePCB(int start, int end) {
-    printf("makePCB() not implemented\n");
-    return NULL;
+    PCB* newPCB = malloc(sizeof(PCB));
+    newPCB->start = start;
+    newPCB->PC = start;
+    newPCB->end = end;
+    return newPCB;
 }
