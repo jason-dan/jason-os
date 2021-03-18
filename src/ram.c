@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include "ram.h"
 #include "shell.h"
 #include "util.h"
@@ -24,5 +25,15 @@ void addToRAM(FILE *p, int *start, int *end) {
 
     (*end) = (feof(p) ? ramIndex - 1 : -1);
 };
+
+char* Ram__access(int index) {
+    return ram[index];
+}
+
+void Ram__clear(int start, int end) {
+    for (int i = start; i <= end; i++) {
+        ram[i] = NULL;
+    }
+}
 
 

@@ -84,7 +84,7 @@ MEM_ENTRY* SM_getEntry(char *var) {
     return entry;
 }
 
-void SM_cleanup() {
+void ShellMemory__cleanup() {
     for (int i = 0; i < sm->size; i++) {
         free(sm->array[i]->var);
         free(sm->array[i]->value);

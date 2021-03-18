@@ -17,7 +17,7 @@ BDIR=./build
 SDIR=./src
 DEPS=$(wildcard $(IDIR)/*.h)
 OBJ = $(patsubst $(SDIR)%.c,%.o,$(wildcard $(SDIR)/*.c))
-EXE = mysh
+EXE = mykernel
 
 #
 # Debug build settings

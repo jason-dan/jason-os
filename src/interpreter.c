@@ -24,6 +24,7 @@
 #include "shell.h"
 #include "util.h"
 #include "kernel.h"
+#include "readyqueue.h"
 
 void help();        // Displays list of available commands to user
 int run();          // Runs a script from a file
@@ -35,7 +36,7 @@ int interpreter(char *words[]) {    // Assumes that the input is an array of wor
     if (strcmp(words[0], "help") == 0) {            // User requests list of possible commands
         help();
     } else if (strcmp(words[0], "quit") == 0) {     // User wishes to quit shell
-        errorCode = -1;
+        quit();
     } else if (strcmp(words[0], "set") == 0) {      // User requests to store a variable in memory
         errorCode = SM_set(words);
     } else if (strcmp(words[0], "print") == 0) {    // User requests to print variable in memory
@@ -47,7 +48,7 @@ int interpreter(char *words[]) {    // Assumes that the input is an array of wor
     } else {
         printf("Unknown command.\n");               // No matching command
     }
-
+    
     return errorCode;
 }
 
@@ -59,6 +60,7 @@ void help() {
         "set VAR STRING\t\tAssigns a value to shell memory\n"
         "print VAR\t\tDisplays the STRING assigned to VAR\n"
         "run SCRIPT.TXT\t\tExecutes the file SCRIPT.TXT\n"
+        "exec prog1 prog2 prog3\tExecutes up to 3 concurrent programs provided as arguments\n"
     );
 }
 
@@ -101,7 +103,7 @@ int exec(char **words) {
 
     if (errorCode == EXIT_SUCCESS) errorCode = scheduler();
 
-    Kernel__cleanup();
+    ReadyQueue__cleanup();
 
 }
 

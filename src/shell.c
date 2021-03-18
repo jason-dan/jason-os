@@ -28,13 +28,6 @@ int shellUI() {
         char** words = parseInput(inputBuffer);
         errorCode = interpreter(words);
         cleanupWords(words);
-
-        if (errorCode == -1) {
-            SM_cleanup();
-            free(inputBuffer);
-            printf("Bye!\n");
-            return EXIT_SUCCESS;
-        }
         displayError(errorCode);
     }
 }

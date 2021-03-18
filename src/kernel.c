@@ -11,12 +11,14 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
+#include <stdbool.h>
 #include "shell.h"
 #include "pcb.h"
 #include "readyqueue.h"
 #include "kernel.h"
 #include "ram.h"
+#include "cpu.h"
+#include "shellmemory.h"
 
 
 int myinit(char *filename) {
@@ -30,7 +32,10 @@ int myinit(char *filename) {
 
     if (!errorCode) {
         addToRAM(file, &startIndex, &endIndex);
-        if (endIndex < startIndex) errorCode = ENOMEM;
+        if (endIndex < startIndex) {
+            errorCode = ENOMEM;
+            printf("ERROR: Not enough RAM to add program.\n");
+        }
     }
 
     if (!errorCode) pcb = makePCB(startIndex, endIndex);
@@ -42,15 +47,39 @@ int myinit(char *filename) {
 }
 
 int scheduler() {
-    printf("scheduler() not implemented");
+    PCB* pcb = ReadyQueue__pop();
+
+    while (pcb) {
+        if (Cpu__isBusy()) continue;
+        
+        Cpu__setIP(pcb->PC);
+
+        int quanta = ((pcb->end - pcb->PC + 1 < DEFAULT_QUANTA) ? pcb->end - pcb->PC + 1 : DEFAULT_QUANTA);
+        Cpu__run(quanta);
+        pcb->PC+= quanta;
+
+        if (pcb->PC > pcb->end) {
+            Ram__clear(pcb->start, pcb->end);
+            free(pcb);
+        } else {
+            ReadyQueue__push(pcb);
+        }
+
+        pcb = ReadyQueue__pop();        
+    }
+
+    return EXIT_SUCCESS;
 }
 
 int main(int argc, char **argv) {
+    printf("Kernel 1.0 loaded!\n");
     shellUI();
 }
 
-void Kernel__cleanup() {
+void quit() {
+    ShellMemory__cleanup();
     ReadyQueue__cleanup();
-    printf("Kernel__cleanup() not implemented");
+    Cpu__cleanup();
+    printf("Bye!\n");
+    exit(EXIT_SUCCESS);
 }
-

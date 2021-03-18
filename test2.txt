@@ -1,6 +1,5 @@
-2-line1
-2-line2
-2-line3
-2-line4
-2-line5
-2-line6
+print prog
+set prog 2-1
+print prog
+set prog 2-2
+quit
