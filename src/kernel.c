@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include "shell.h"
 #include "pcb.h"
 #include "readyqueue.h"
@@ -19,7 +20,7 @@
 
 
 int myinit(char *filename) {
-    int startPtr, endPtr;
+    uintptr_t startPtr = 0, endPtr = 0;
     PCB* pcb = NULL;
 
     int errorCode = EXIT_SUCCESS;
