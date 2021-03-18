@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "pcb.h"
 
-PCB* makePCB(uintptr_t start, uintptr_t end) {
+PCB* makePCB(int start, int end) {
     printf("makePCB() not implemented\n");
     return NULL;
 }

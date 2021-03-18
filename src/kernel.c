@@ -20,7 +20,7 @@
 
 
 int myinit(char *filename) {
-    uintptr_t startPtr = 0, endPtr = 0;
+    int startIndex = 0, endIndex = 0;
     PCB* pcb = NULL;
 
     int errorCode = EXIT_SUCCESS;
@@ -29,11 +29,11 @@ int myinit(char *filename) {
     if (!file) errorCode = EIO;
 
     if (!errorCode) {
-        addToRAM(file, &startPtr, &endPtr);
-        if (endPtr < startPtr) errorCode = ENOMEM;
+        addToRAM(file, &startIndex, &endIndex);
+        if (endIndex < startIndex) errorCode = ENOMEM;
     }
 
-    if (!errorCode) pcb = makePCB(startPtr, endPtr);
+    if (!errorCode) pcb = makePCB(startIndex, endIndex);
 
     if (pcb != NULL) ReadyQueue__push(pcb);
 
