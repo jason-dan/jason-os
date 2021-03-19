@@ -5,5 +5,5 @@
     void addToRAM(FILE *p, int *start, int *end);
     char* Ram__access(int index);
     void Ram__clear(int start, int end);
-    #define RAM_SIZE 1000
+    #define RAM_SIZE 40
 #endif
