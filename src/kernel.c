@@ -86,7 +86,8 @@ int kernel() {
 }
 
 void boot() {
-    printf("boot not implemented\n");
+    system("rm -rf BackingStore");
+    system("mkdir BackingStore");
 }
 
 void quit() {
