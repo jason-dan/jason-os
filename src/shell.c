@@ -11,10 +11,11 @@
 #include "shellmemory.h"
 #include "shell.h"
 
+void displayError(int error);
+
 int shellUI() {
     int errorCode = EXIT_SUCCESS;
 
-    SM_init();
     char *inputBuffer = (char *) malloc(sizeof(char) * USER_INPUT_BUFFER_SIZE);
 
     printf("Welcome to the Jason shell!\nShell version 2.0 Updated February 2021\n");
@@ -25,11 +26,15 @@ int shellUI() {
 
         fgets(inputBuffer, (USER_INPUT_BUFFER_SIZE - 1), stdin);
 
-        char** words = parseInput(inputBuffer);
-        errorCode = interpreter(words);
-        cleanupWords(words);
-        displayError(errorCode);
+        executeLine(inputBuffer);
     }
+}
+
+void executeLine(char *line) {
+    char** words = parseInput(line);
+    int errorCode = interpreter(words);
+    displayError(errorCode);
+    cleanupWords(words);
 }
 
 // Utility method to display error messages.

@@ -38,9 +38,9 @@ int interpreter(char *words[]) {    // Assumes that the input is an array of wor
     } else if (strcmp(words[0], "quit") == 0) {     // User wishes to quit shell
         quit();
     } else if (strcmp(words[0], "set") == 0) {      // User requests to store a variable in memory
-        errorCode = SM_set(words);
+        errorCode = SM__set(words);
     } else if (strcmp(words[0], "print") == 0) {    // User requests to print variable in memory
-        errorCode = SM_print(words);
+        errorCode = SM__print(words);
     } else if (strcmp(words[0], "run") == 0) {      // User requests to run a script
         errorCode = run(words);
     } else if (strcmp(words[0], "exec") == 0) {      // User requests to run a script
@@ -73,7 +73,7 @@ int run(char **words) {
     char line[USER_INPUT_BUFFER_SIZE];
     
     while(fgets(line, USER_INPUT_BUFFER_SIZE - 1, file)) {
-        displayError(interpreter(parseInput(line)));
+        executeLine(line);
     }
 
     fclose(file);

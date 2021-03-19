@@ -25,9 +25,7 @@ int Cpu__run(int quanta) {
     while(CPU->quanta > 0) {
         strcpy(CPU->IR, Ram__access(CPU->IP));
 
-        char **words = parseInput(CPU->IR);
-        displayError(interpreter(words));
-        cleanupWords(words);
+        executeLine(CPU->IR);
 
         CPU->quanta--;
         CPU->IP++;
