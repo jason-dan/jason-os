@@ -95,6 +95,9 @@ int SM__init() {
 }
 
 void ShellMemory__cleanup() {
+    
+    if (!sm) return;
+
     for (int i = 0; i < sm->size; i++) {
         free(sm->array[i]->var);
         free(sm->array[i]->value);

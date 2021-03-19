@@ -20,6 +20,15 @@
 #include "cpu.h"
 #include "shellmemory.h"
 
+int kernel();
+void boot();
+
+int main(int argc, char **argv) {
+    int error = 0;
+    boot();
+    error = kernel();
+    return error;
+}
 
 int myinit(char *filename) {
     int startIndex = 0, endIndex = 0;
@@ -71,9 +80,13 @@ int scheduler() {
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char **argv) {
+int kernel() {
     printf("Kernel 1.0 loaded!\n");
-    shellUI();
+    return shellUI();
+}
+
+void boot() {
+    printf("boot not implemented\n");
 }
 
 void quit() {
