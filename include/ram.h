@@ -4,6 +4,7 @@
     #include <stdint.h>
     void addToRAM(FILE *p, int *start, int *end);
     char* Ram__access(int index);
+    void Ram__write(char *line, int index);
     void Ram__clear(int start, int end);
     #define RAM_SIZE 40
 #endif

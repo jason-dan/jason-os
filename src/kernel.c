@@ -19,6 +19,7 @@
 #include "ram.h"
 #include "cpu.h"
 #include "shellmemory.h"
+#include "memorymanager.h"
 
 int kernel();
 void boot();
@@ -31,46 +32,83 @@ int main(int argc, char **argv) {
 }
 
 int myinit(char *filename) {
-    int startIndex = 0, endIndex = 0;
-    PCB* pcb = NULL;
-
     int errorCode = EXIT_SUCCESS;
 
     FILE *file = fopen(filename, "r");
     if (!file) errorCode = EIO;
 
     if (!errorCode) {
-        addToRAM(file, &startIndex, &endIndex);
-        if (endIndex < startIndex) {
-            errorCode = ENOMEM;
-            printf("ERROR: Not enough RAM to add program.\n");
-        }
+        errorCode = launcher(file);
     }
-
-    if (!errorCode) pcb = makePCB(startIndex, endIndex);
-
-    if (pcb != NULL) ReadyQueue__push(pcb);
 
     if (file) fclose(file);
     return errorCode;
 }
 
 int scheduler() {
+    
     PCB* pcb = ReadyQueue__pop();
 
     while (pcb) {
-        if (Cpu__isBusy()) continue;
-        
-        Cpu__setIP(pcb->PC);
+        int instructionsExecuted = 0;
+        bool pageFault = false;
 
-        int quanta = ((pcb->end - pcb->PC + 1 < DEFAULT_QUANTA) ? pcb->end - pcb->PC + 1 : DEFAULT_QUANTA);
-        Cpu__run(quanta);
-        pcb->PC+= quanta;
+        if (pcb->pageTable[pcb->PC_page] != -1) {
 
-        if (pcb->PC > pcb->end) {
-            Ram__clear(pcb->start, pcb->end);
-            free(pcb);
+            Cpu__setIP(pcb->PC);
+            Cpu__setOffset(pcb->PC_offset);
+
+            instructionsExecuted = Cpu__run(DEFAULT_QUANTA);
+
+            pcb->PC_offset+=instructionsExecuted;
+
+            // Check to see if end of page has been reached
+            if (pcb->PC_offset >= PAGE_SIZE) {
+                pcb->PC_offset = 0;
+                pcb->PC_page++;
+            }
+            
+            if (pcb->PC_page < pcb->pages_max) {
+                if ((pcb->pageTable[pcb->PC_page] != -1) && pcb->PC_offset == 0) {
+                    pcb->PC = 4 * pcb->pageTable[pcb->PC_page];
+                } else if (pcb->PC_offset == 0) {
+                    FILE *file = fopen(pcb->filename, "r");
+                    int frame = findFrame(), victim = -1;
+                    if (frame == -1) {
+                        victim = findVictim(pcb);
+                        frame = victim;
+                    }
+
+                    loadPage(pcb->PC_page, file, frame);
+                    fclose(file);
+
+                    updatePageTable(pcb, pcb->PC_page, frame, victim);
+
+                    pcb->PC = frame * 4;
+                
+                }
+
+                ReadyQueue__push(pcb);
+            } else {
+                PCB__destroy(pcb);
+            }
         } else {
+            // As page is invalid, load the page and put it back into the queue
+            FILE *file = fopen(pcb->filename, "r");
+
+            int frame = findFrame(), victim = -1;
+            if (frame == -1) {
+                victim = findVictim(pcb);
+                frame = victim;
+            }
+
+            loadPage(pcb->PC_page, file, frame);
+            fclose(file);
+
+            updatePageTable(pcb, pcb->PC_page, frame, victim);
+
+            pcb->PC = (frame * 4);
+
             ReadyQueue__push(pcb);
         }
 

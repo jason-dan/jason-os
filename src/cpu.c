@@ -12,38 +12,47 @@
 #include "interpreter.h"
 #include "shell.h"
 
-typedef struct {int IP; char IR[1000]; int quanta;} CPU_T;
+typedef struct {int IP; char IR[1000]; int quanta; int offset;} CPU_T;
 
-void init();
+void Cpu__init();
 
 CPU_T* CPU = NULL;
 
 int Cpu__run(int quanta) {
-    if (!CPU) init();
+    if (!CPU) Cpu__init();
     CPU->quanta = quanta;
     
-    while(CPU->quanta > 0) {
-        strcpy(CPU->IR, Ram__access(CPU->IP));
+    while(CPU->quanta > 0 && CPU->offset < 4) {
+        if (Ram__access(CPU->IP + CPU->offset)) {
+            strcpy(CPU->IR, Ram__access(CPU->IP + CPU->offset));
 
-        executeLine(CPU->IR);
+            executeLine(CPU->IR);
+        }
 
         CPU->quanta--;
-        CPU->IP++;
+        CPU->offset++;
     }
+
+    return quanta - CPU->quanta;
 }
 
 
 void Cpu__setIP(int index) {
-    if (!CPU) init();
+    if (!CPU) Cpu__init();
     CPU->IP = index;
 }
 
 bool Cpu__isBusy() {
-    if (!CPU) init();
+    if (!CPU) Cpu__init();
     return (CPU->quanta > 0);
 }
 
-void init(){
+void Cpu__setOffset(int offset) {
+    if (!CPU) Cpu__init();
+    CPU->offset = offset;
+}
+
+void Cpu__init(){
     CPU = malloc(sizeof(CPU_T));
     CPU->IP = 0;
     CPU->quanta = 0;

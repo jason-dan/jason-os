@@ -86,17 +86,8 @@ int exec(char **words) {
 
     int scriptCounter = 1;
     while (scriptCounter <= 3 && words[scriptCounter] && errorCode == EXIT_SUCCESS) {
-        
-        for (int i = 1; i < scriptCounter; i++) {
-            if (strcmp(words[i], words[scriptCounter]) == 0) {
-                printf("Error: Script %s already loaded.\n", words[scriptCounter]);
-                errorCode = EINVAL;
-            }
-        }
 
-        if (errorCode == EXIT_SUCCESS) {
             errorCode = myinit(words[scriptCounter]);
-        }
 
         scriptCounter++;
     }

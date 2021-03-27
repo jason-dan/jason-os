@@ -14,18 +14,6 @@
 char *ram[RAM_SIZE];
 int ramIndex = 0;
 
-void addToRAM(FILE *p, int *start, int *end) {
-    char line[USER_INPUT_BUFFER_SIZE];
-    (*start) = ramIndex;
-    
-    while (ramIndex < RAM_SIZE && fgets(line, USER_INPUT_BUFFER_SIZE, p) != NULL) {
-        ram[ramIndex] = strdup(line);
-        ramIndex++;
-    }
-
-    (*end) = (feof(p) ? ramIndex - 1 : -1);
-};
-
 char* Ram__access(int index) {
     return ram[index];
 }
@@ -34,6 +22,10 @@ void Ram__clear(int start, int end) {
     for (int i = start; i <= end; i++) {
         ram[i] = NULL;
     }
+}
+
+void Ram__write(char *line, int index) {
+    ram[index] = line;
 }
 
 
