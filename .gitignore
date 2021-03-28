@@ -1,5 +1,6 @@
 /build
 /.vscode
+/BackingStore
 jason-os.code-workspace
 mysh
 mykernel

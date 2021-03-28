@@ -83,12 +83,15 @@ int interpreter(char *words[]) {    // Assumes that the input is an array of wor
 void help() {
     printf(
         "The following commands are supported:\n"
-        "help\t\t\tDisplays all the commands\n"
-        "quit\t\t\tExits the shell\n"
-        "set VAR STRING\t\tAssigns a value to shell memory\n"
-        "print VAR\t\tDisplays the STRING assigned to VAR\n"
-        "run SCRIPT.TXT\t\tExecutes the file SCRIPT.TXT\n"
-        "exec prog1 prog2 prog3\tExecutes up to 3 concurrent programs provided as arguments\n"
+        "help\t\t\t\t\tDisplays all the commands\n"
+        "quit\t\t\t\t\tExits the shell\n"
+        "set VAR STRING\t\t\t\tAssigns a value to shell memory\n"
+        "print VAR\t\t\t\tDisplays the STRING assigned to VAR\n"
+        "run SCRIPT.TXT\t\t\t\tExecutes the file SCRIPT.TXT\n"
+        "exec prog1 prog2 prog3\t\t\tExecutes up to 3 concurrent programs provided as arguments\n"
+        "mount NAME NUM_BLOCKS BLOCK_SIZE\tMounts partition, creating new partition if necessary\n"
+        "write FILE [WORDS]\t\t\tWrites word collection to file\n"
+        "read FILE VAR\t\t\t\tReads file into VAR\n"
     );
 }
 
