@@ -4,14 +4,31 @@
  * interpreter() function accepts has a             *
  * corresponding function that implements the       *
  * command's functionality. Give the function the   *
- * same name as the command. 
- * 
+ * same name as the command.                        *
+ *                                                  *
  * Commands:                                        *
+ *                                                  *
  * help - Displays all the commands                 *
+ *                                                  * 
  * quit - Exits and terminates the shell with "Bye!"*
+ *                                                  *
  * set VAR STRING - Assigns a value to shell memory *
+ *                                                  *
  * print VAR - Displays the String assigned to VAR  *
- * run SCRIPT.TXT - Executes the file SCRIPT.TXT    *                                                 *
+ *                                                  *
+ * run SCRIPT.TXT - Executes the file SCRIPT.TXT    *  
+ *                                                  *
+ * exec PROG1 PROG2 PROG3 - Executes up to 3        *
+ * concurrent programs provided as arguments        *
+ *                                                  *
+ * mount NAME NUM_BLOCKS BLOCK_SIZE - Mounts        *
+ * partition, creating new partition if necessary   *
+ *                                                  *
+ * write FILE [WORDS] - Writes word collection to   *
+ * file                                             *
+ *                                                  *
+ * read FILE VAR - Reads file into VAR              *
+ *                                                  *
  * Jason Dan | 260718739                            *
  ****************************************************/ 
 
@@ -25,27 +42,38 @@
 #include "util.h"
 #include "kernel.h"
 #include "readyqueue.h"
+#include "DISK_driver.h"
 
 void help();        // Displays list of available commands to user
 int run();          // Runs a script from a file
 int exec();         // executes scripts in the kernel
+int mount();        // interpreter function for mounting partitions
+int write();        // writes data to files
+int read();         // reads data from file into shell memory
 
 int interpreter(char *words[]) {    // Assumes that the input is an array of words
     int errorCode = EXIT_SUCCESS;
     
-    if (strcmp(words[0], "help") == 0) {            // User requests list of possible commands
+    if (strcmp(words[0], "help") == 0) {            // Display list of possible commands
         help();
-    } else if (strcmp(words[0], "quit") == 0) {     // User wishes to quit shell
+    } else if (strcmp(words[0], "quit") == 0) {     // Quit shell
         quit();
-    } else if (strcmp(words[0], "set") == 0) {      // User requests to store a variable in memory
+    } else if (strcmp(words[0], "set") == 0) {      // Store a variable in memory
         errorCode = SM__set(words);
-    } else if (strcmp(words[0], "print") == 0) {    // User requests to print variable in memory
+    } else if (strcmp(words[0], "print") == 0) {    // Print variable in memory
         errorCode = SM__print(words);
-    } else if (strcmp(words[0], "run") == 0) {      // User requests to run a script
+    } else if (strcmp(words[0], "run") == 0) {      // Run a script
         errorCode = run(words);
-    } else if (strcmp(words[0], "exec") == 0) {      // User requests to run a script
+    } else if (strcmp(words[0], "exec") == 0) {      // Execute programs concurrently
         errorCode = exec(words);
-    } else {
+    } else if (strcmp(words[0], "mount") == 0) {      // Mount and create new disk partitions
+        errorCode = mount(words);
+    } else if (strcmp(words[0], "write") == 0) {      // Write to file
+        errorCode = write(words);
+    } else if (strcmp(words[0], "read") == 0) {      // Read from file into shell memory
+        errorCode = read(words);
+    }
+    else {
         printf("Unknown command.\n");               // No matching command
     }
     
@@ -96,6 +124,16 @@ int exec(char **words) {
 
     ReadyQueue__cleanup();
 
+}
+
+int mount() {
+    printf("mount() not implemented\n");
+}
+int write() {
+    printf("write() not implemented\n");
+} 
+int read() {
+    printf("read() not implemented\n");
 }
 
 char** parseInput(char ui[]) {
