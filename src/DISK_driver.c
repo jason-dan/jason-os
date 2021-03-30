@@ -7,7 +7,16 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "DISK_driver.h"
+#include "util.h"
+
+char* getPartitionPath(char *name);
+
+// Filepath to partition folder
+const char partitionPath[] = "./PARTITION/";
 
 // Local copy of active partition metadata
 struct PARTITION {
@@ -41,3 +50,51 @@ FILE *active_file_table[5] = {NULL};
 // set to -1 when there is no file affiliated.
 int active_file_map[5];
 
+
+void initIO() {
+    
+    // Create PARTITION folder if not present.
+    if (access(partitionPath, F_OK)) {
+        char command[100];
+        strcpy(command, "mkdir ");
+        strcat(command, partitionPath);
+        system(command);
+    }
+
+    // Initialize active file map
+    for (int i = 0; i < 5; i++) {
+        active_file_map[i] = -1;
+    }
+
+    
+}   
+
+int partition(char *name, int blocksize, int totalblocks) {
+    printf("partition not implemeted\n");
+}  
+
+int mountFS(char *name) {
+    printf("mountFS not implemeted\n");
+}
+
+int openfile(char *name) {
+    printf("openfile not implemeted\n");
+}  
+
+int partitionExists(char *name) {
+
+    char *filepath = getPartitionPath(name);
+    
+    int exists = (access(filepath, F_OK) == 0) ? 1 : 0;
+    free(filepath);
+
+    return exists;
+}
+
+// Appends argument partition name to partition folder path. Allocates and returns filepath to partition.
+char* getPartitionPath(char *name) {
+    char *filepath = (char*) malloc(sizeof(char) * 100);
+    strcpy(filepath, partitionPath);
+    strcat(filepath, name);
+    return filepath;
+}

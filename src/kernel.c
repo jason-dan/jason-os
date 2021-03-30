@@ -20,6 +20,7 @@
 #include "cpu.h"
 #include "shellmemory.h"
 #include "memorymanager.h"
+#include "DISK_driver.h"
 
 int kernel();
 void boot();
@@ -126,6 +127,7 @@ int kernel() {
 void boot() {
     system("rm -rf BackingStore");
     system("mkdir BackingStore");
+    initIO();
 }
 
 void quit() {

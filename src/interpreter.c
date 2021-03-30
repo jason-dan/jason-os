@@ -36,6 +36,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <limits.h>
+
+
 #include "interpreter.h"
 #include "shellmemory.h"
 #include "shell.h"
@@ -129,8 +132,31 @@ int exec(char **words) {
 
 }
 
-int mount() {
-    printf("mount() not implemented\n");
+// The command mount uses the partition()
+// and mountFS() functions. If a partition
+// already exists with the name provided
+// then the existing partition is mounted,
+// otherwise the provided arguments arse used
+// to create and mount the new partition.
+// Command: mount partitionName number_of_blocks block_size
+int mount(char **words) {
+    
+    int errorcode = EXIT_SUCCESS;
+
+    // Check inputs. This command requires all arguments to be valid.
+    if (!words[1] || !words[2] || !words[3] ||
+            atoi(words[2]) > MAX_BLOCK_COUNT ||
+            atoi(words[3]) > MAX_BLOCK_SIZE) return EINVAL;
+
+    // Only create new partition if no partition exists with given name.
+    if (!partitionExists(words[1])) {
+
+        // As partition returns 1 if successful, set errorcode to fail if 0 is returned.
+        if (partition(words[1], atoi(words[2]), atoi(words[3])) == 0) return EXIT_FAILURE;
+    }
+
+    return (mountFS(words[1]) == 1) ? EXIT_SUCCESS : EXIT_FAILURE;
+    
 }
 int write() {
     printf("write() not implemented\n");
