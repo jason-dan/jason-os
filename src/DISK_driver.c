@@ -52,7 +52,16 @@ int active_file_map[5];
 
 
 void initIO() {
-    
+
+    // Initialize active file map
+    for (int i = 0; i < 5; i++) {
+        active_file_map[i] = -1;
+    }
+
+}   
+
+int partition(char *name, int blocksize, int totalblocks) {
+
     // Create PARTITION folder if not present.
     if (access(partitionPath, F_OK)) {
         char command[100];
@@ -61,16 +70,7 @@ void initIO() {
         system(command);
     }
 
-    // Initialize active file map
-    for (int i = 0; i < 5; i++) {
-        active_file_map[i] = -1;
-    }
-
     
-}   
-
-int partition(char *name, int blocksize, int totalblocks) {
-    printf("partition not implemeted\n");
 }  
 
 int mountFS(char *name) {

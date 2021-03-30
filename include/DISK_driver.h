@@ -8,7 +8,7 @@
 
     // Create and format partition. Called 
     // from mount() in interpreter. Returns 1 
-    // if successful, else 0.
+    // if successful, else 0. Assumes that partition does not exist.
     int partition(char *name, int blocksize, int totalblocks);  
 
     // Load FAT & allocate buffer_block with partition metadata. 
