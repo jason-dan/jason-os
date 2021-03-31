@@ -18,10 +18,16 @@
 
     // Find filename or creates file 
     // if it does not exist, returns file's FAT index.
+    // Returns -1 on error.
     int openfile(char *name);   
 
     // Returns 1 if partition with name already exists, else 0.
     int partitionExists(char *name);
+
+    // Using the file FAT index number,
+    // write data to disk at current_location
+    int writeBlock(int file, char *data);
+
 
 #define MAX_BLOCK_COUNT 200
 #define MAX_BLOCK_SIZE UINT_MAX

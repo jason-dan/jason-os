@@ -170,12 +170,22 @@ int write(char** words) {
 
     int errorCode = EXIT_SUCCESS;
     
-    if (!validWriteCommand(words)) return EINVAL;
+    int lastWordIndex = validWriteCommand(words);
+    if (lastWordIndex == 0) return EINVAL;
 
     // Open and store fid
     int fid = openfile(words[2]);
+    if (fid == -1) return ENFILE;
 
+    // Write all words between brackets to file
+    for (int i = 2; i <= lastWordIndex && !errorCode; i++) {
+        char *word = strtok(words[i], "[]");    // Remove brackets from input
+        if (word) {
+            errorCode = writeBlock(fid, word);
+        }
+    }
 
+    return errorCode;
 } 
 int read() {
     printf("read() not implemented\n");
@@ -221,10 +231,11 @@ void cleanupWords(char** words) {
 
 // Checks if the sequence of words 
 // is a valid input for the write command. 
-// Returns 1 if contains more than 3 words, 
-// third word starts with opening bracket 
+// Returns the index of the word containing 
+// the first closing bracket if contains more
+// than 3 words, third word starts with opening bracket 
 // and there exists a closing 
-// bracket afterwards, else returns 0.
+// bracket afterwards. Otherwise else returns 0.
 int validWriteCommand(char **words) {
 
     // Ensure that arguments are present and that open bracket is present 
@@ -233,7 +244,7 @@ int validWriteCommand(char **words) {
     // Ensure that there exists a closing bracket starting from word index 2. Return 1 if found.
     int i = 2;
     while (words[i]) {
-        if (strchr(words[i], ']')) return 1;
+        if (strchr(words[i], ']')) return i;
         i++;
     }
 

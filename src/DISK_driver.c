@@ -172,6 +172,10 @@ int partitionExists(char *name) {
     return exists;
 }
 
+int writeBlock(int file, char *data) {
+    printf("writeBlock not implemented\n");
+}
+
 // Appends argument partition name to partition folder path. Allocates and returns filepath to partition.
 char* getPartitionPath(char *name) {
     char *filepath = (char*) malloc(sizeof(char) * 100);
