@@ -53,6 +53,7 @@ int exec();         // executes scripts in the kernel
 int mount();        // interpreter function for mounting partitions
 int write();        // writes data to files
 int read();         // reads data from file into shell memory
+int validWriteCommand(char **words);
 
 int interpreter(char *words[]) {    // Assumes that the input is an array of words
     int errorCode = EXIT_SUCCESS;
@@ -152,14 +153,29 @@ int mount(char **words) {
     if (!partitionExists(words[1])) {
 
         // As partition returns 1 if successful, set errorcode to fail if 0 is returned.
-        if (partition(words[1], atoi(words[2]), atoi(words[3])) == 0) return EXIT_FAILURE;
+        if (partition(words[1], atoi(words[2]), atoi(words[3])) == EXIT_FAILURE) return EXIT_FAILURE;
     }
 
-    return (mountFS(words[1]) == 1) ? EXIT_SUCCESS : EXIT_FAILURE;
+    return mountFS(words[1]);
     
 }
-int write() {
-    printf("write() not implemented\n");
+
+// The write command checks to see if
+// filename is open. If it's open, then
+// the words collection provided between
+// brackets is written to the file. If not open,
+// it opens it and then writes.
+// Command format: write filename [a collection of words]
+int write(char** words) {
+
+    int errorCode = EXIT_SUCCESS;
+    
+    if (!validWriteCommand(words)) return EINVAL;
+
+    // Open and store fid
+    int fid = openfile(words[2]);
+
+
 } 
 int read() {
     printf("read() not implemented\n");
@@ -201,4 +217,25 @@ void cleanupWords(char** words) {
     }
     free(words); 
     words = NULL;
+}
+
+// Checks if the sequence of words 
+// is a valid input for the write command. 
+// Returns 1 if contains more than 3 words, 
+// third word starts with opening bracket 
+// and there exists a closing 
+// bracket afterwards, else returns 0.
+int validWriteCommand(char **words) {
+
+    // Ensure that arguments are present and that open bracket is present 
+    if (!words[1] || !words[2] || words[2][0] != '[') return 0;
+
+    // Ensure that there exists a closing bracket starting from word index 2. Return 1 if found.
+    int i = 2;
+    while (words[i]) {
+        if (strchr(words[i], ']')) return 1;
+        i++;
+    }
+
+    return 0;
 }

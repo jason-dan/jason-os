@@ -83,7 +83,7 @@ void initIO() {
 
 }   
 
-int partition(char *name, int blocksize, int totalblocks) {
+int partition(char *name, int totalblocks, int blocksize) {
 
     int errorCode = EXIT_SUCCESS;
 
@@ -130,7 +130,7 @@ int partition(char *name, int blocksize, int totalblocks) {
 
         system(command);
         free(filepath);
-        
+
         return EXIT_FAILURE;
     }
 
@@ -138,7 +138,24 @@ int partition(char *name, int blocksize, int totalblocks) {
 }  
 
 int mountFS(char *name) {
-    printf("mountFS not implemeted\n");
+    
+    initIO();
+    
+    char *filepath = getPartitionPath(name);
+    FILE *pfile = fopen(filepath, "rb");
+    free(filepath);
+    if (!pfile) return EXIT_FAILURE;
+
+    // Read entire contents of partition and fat data
+    fread(&localPartition, sizeof(localPartition), 1, pfile);
+    fread(&localFAT, sizeof(localFAT), 1, pfile);
+
+    fclose(pfile);
+
+    if (block_buffer) free(block_buffer);
+    block_buffer = (char*) malloc(localPartition.block_size);
+
+    return EXIT_SUCCESS;
 }
 
 int openfile(char *name) {

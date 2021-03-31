@@ -7,12 +7,13 @@
     void initIO();   
 
     // Create and format partition. Called 
-    // from mount() in interpreter. Returns 1 
-    // if successful, else 0. Assumes that partition does not exist.
-    int partition(char *name, int blocksize, int totalblocks);  
+    // from mount() in interpreter. Assumes that partition does not exist.
+    int partition(char *name, int totalblocks, int blocksize);  
 
-    // Load FAT & allocate buffer_block with partition metadata. 
-    // Called from mount(). Returns 1 on success, else 0.
+    // Open the partition from the PARTITION directory
+    // and loads the information from the partition in the
+    // global partition and FAT structures. This function
+    // will also malloc block_size bytes and assign that to block_buffer.
     int mountFS(char *name);    
 
     // Find filename or creates file 
