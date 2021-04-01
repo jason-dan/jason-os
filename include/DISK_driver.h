@@ -26,9 +26,11 @@
 
     // Using the file FAT index number,
     // write data to disk at current_location
+    // Assumes that file is opened.
     int writeBlock(int file, char *data);
 
 
 #define MAX_BLOCK_COUNT 200
 #define MAX_BLOCK_SIZE UINT_MAX
+#define MAX_FILENAME_LENGTH 20
 #endif

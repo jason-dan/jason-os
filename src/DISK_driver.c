@@ -9,11 +9,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "DISK_driver.h"
 #include "util.h"
 
 char* getPartitionPath(char *name);
+
+// Utility method which writes (destructive) local Partition and FAT data to partition file.
+int syncPartition();
+
+// Returns FILE pointer from active file table for provided FAT file index. Returns NULL if not currently open.
+FILE* getFilePointer(int file);
+
+// Sets provided file pointer to point to the start of specified block number
+FILE* seekToBlock(FILE *filePtr, int block);
 
 // Filepath to partition folder
 const char partitionPath[] = "./PARTITION/";
@@ -53,6 +63,7 @@ FILE *active_file_table[5] = {NULL};
 // set to -1 when there is no file affiliated.
 int active_file_map[5];
 
+char *currentPartitionPath = NULL;
 
 void initIO() {
 
@@ -80,6 +91,8 @@ void initIO() {
     for (int i = 0; i < 5; i++) {
         active_file_map[i] = -1;
     }
+
+    if (currentPartitionPath) free(currentPartitionPath);
 
 }   
 
@@ -141,9 +154,8 @@ int mountFS(char *name) {
     
     initIO();
     
-    char *filepath = getPartitionPath(name);
-    FILE *pfile = fopen(filepath, "rb");
-    free(filepath);
+    currentPartitionPath = getPartitionPath(name);
+    FILE *pfile = fopen(currentPartitionPath, "rb");
     if (!pfile) return EXIT_FAILURE;
 
     // Read entire contents of partition and fat data
@@ -159,7 +171,62 @@ int mountFS(char *name) {
 }
 
 int openfile(char *name) {
-    printf("openfile not implemeted\n");
+
+    int fid = -1;
+    int activeFileTableIndex = -1;
+
+
+    if (strlen(name) >= MAX_FILENAME_LENGTH || strlen(name) == 0) {
+        printf("Error: Invalid filename. ");
+        return -1;
+    }
+
+    // Check if file exists in FAT
+    for (int i = 0; i < 20; i++) {
+        if (strcmp(name, localFAT[i].filename) == 0) {
+            fid = i;
+            break;
+        }
+    }
+
+    // Check if file is already opened, return if true
+    if (fid != -1) {
+        for (int i = 0; i < 5; i++) {
+            if (active_file_map[i] == fid) return fid;
+        }
+    }
+
+    // Check if capacity exists in active file table
+    for (int i = 0; i < 5; i++) {
+        if (active_file_table[i] == NULL) {
+            activeFileTableIndex = i;
+            break;
+        }
+    }
+    if (activeFileTableIndex == -1) return -1;  // Return -1 if active file table is full
+
+    // Create FAT entry if none exists in FAT.
+    if (fid == -1) {
+
+        // Find next available FAT cell
+        for (int i = 0; i < 20; i++) {
+            if (localFAT[i].filename[0] == '\0') {
+                fid = i;
+                break;
+            }
+        }
+        if (fid == -1) return -1;   // Return error if no available cell in FAT
+
+        // Create new entry in FAT
+        strcpy(localFAT[fid].filename, name);
+        syncPartition();
+    }
+
+    // Open file and create new entry in active file table
+    active_file_table[activeFileTableIndex] = fopen(currentPartitionPath, "rb+");
+    active_file_map[activeFileTableIndex] = fid;
+
+    return fid;
 }  
 
 int partitionExists(char *name) {
@@ -172,10 +239,6 @@ int partitionExists(char *name) {
     return exists;
 }
 
-int writeBlock(int file, char *data) {
-    printf("writeBlock not implemented\n");
-}
-
 // Appends argument partition name to partition folder path. Allocates and returns filepath to partition.
 char* getPartitionPath(char *name) {
     char *filepath = (char*) malloc(sizeof(char) * 100);
@@ -183,4 +246,84 @@ char* getPartitionPath(char *name) {
     strcat(filepath, name);
     strcat(filepath, partitionExt);
     return filepath;
+}
+
+int syncPartition() {
+    FILE *pfile = fopen(currentPartitionPath, "rb+");
+    if (!pfile) {
+        printf("syncPartition failed!\n");
+        return EXIT_FAILURE;
+    }
+
+    fwrite(&localPartition, sizeof(localPartition), 1, pfile);
+    fwrite(&localFAT, sizeof(localFAT), 1, pfile);
+
+    fclose(pfile);
+    return EXIT_SUCCESS;
+}
+
+int writeBlock(int file, char *data) {
+
+    int errorCode = EXIT_SUCCESS;
+    int posInWord = 0;  // Char index in word to write
+    int wordLength = strlen(data);  // Char count of word to write
+    FILE *filePtr = getFilePointer(file);  // File pointer entry in active_file_table
+    
+    // Check if partition has capacity
+    if (localPartition.used_blocks == localPartition.total_blocks) return ENOSPC;
+
+    // Initialize current_position if needed
+    if (localFAT[file].current_location == -1) localFAT[file].current_location = 0;
+
+    while (posInWord < wordLength && localPartition.used_blocks < localPartition.total_blocks && localFAT[file].current_location < 10) {
+
+        // Seek file pointer to next available block
+        filePtr = seekToBlock(filePtr, localPartition.used_blocks);
+     
+        // Update FAT block_ptr[current_location] with currently used block
+        localFAT[file].blockPtrs[localFAT[file].current_location] = localPartition.used_blocks;
+
+        // Increment used_block in partition
+        localPartition.used_blocks++;
+
+        // Fill block with word, padding with 0 if needed
+        int posInBlock = 0;
+        while (posInBlock < localPartition.block_size) {
+            
+            if (posInWord < wordLength) {
+                fputc(data[posInWord], filePtr);
+                posInWord++;
+            } else {
+                fputc('0', filePtr);
+            }
+
+            posInBlock++;
+        }
+
+        // Increment current_location
+        localFAT[file].current_location++;
+
+        // Sync partition data
+        syncPartition();
+    }
+    fflush(filePtr);
+    
+    return errorCode;
+}
+
+FILE* getFilePointer(int file) {
+    for (int i = 0; i < 5; i++) {
+        if (active_file_map[i] == file) {
+            return active_file_table[i];
+        }
+    }
+    return NULL;
+}
+
+FILE* seekToBlock(FILE *filePtr, int block) {
+
+    int offset = sizeof(localPartition) + sizeof(localFAT) + (localPartition.block_size * block);
+
+    fseek(filePtr, offset, SEEK_SET);
+    return filePtr;
 }

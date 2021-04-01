@@ -174,7 +174,7 @@ int write(char** words) {
     if (lastWordIndex == 0) return EINVAL;
 
     // Open and store fid
-    int fid = openfile(words[2]);
+    int fid = openfile(words[1]);
     if (fid == -1) return ENFILE;
 
     // Write all words between brackets to file
@@ -187,6 +187,7 @@ int write(char** words) {
 
     return errorCode;
 } 
+
 int read() {
     printf("read() not implemented\n");
 }
