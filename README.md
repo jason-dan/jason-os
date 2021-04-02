@@ -16,6 +16,7 @@ We've got CPU emulation. We've got schedulers and ready queues for that CPU. We'
 ### Disk system emulation
 > Oh wow I wish there was a way to store this text in a persistent way
 > - Someone
+
 Do you enjoy creating and mounting partitions with custom defined File Allocation Table parameters? Look no more. Use the command `mount PARTITION_NAME NUMBER_OF_BLOCKS BYTES_PER_BLOCK` and jason-os will create a new partition and mount it for you. If it already exists, it'll just mount it for you.
 
 ### File system
