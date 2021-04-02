@@ -25,6 +25,11 @@ FILE* getFilePointer(int file);
 // Sets provided file pointer to point to the start of specified block number
 FILE* seekToBlock(FILE *filePtr, int block);
 
+// Using the file FAT index number, load buffer
+// with data from current_location. Return block data as 
+//string from block_buffer, without any '0' characters.
+char* readBlock(int file);
+
 // Filepath to partition folder
 const char partitionPath[] = "./PARTITION/";
 
@@ -166,6 +171,7 @@ int mountFS(char *name) {
 
     if (block_buffer) free(block_buffer);
     block_buffer = (char*) malloc(localPartition.block_size);
+    memset(block_buffer, '0', localPartition.block_size);
 
     return EXIT_SUCCESS;
 }
@@ -303,11 +309,14 @@ int writeBlock(int file, char *data) {
         // Increment current_location
         localFAT[file].current_location++;
 
+        // Increment file_length
+        localFAT[file].file_length++;
+
         // Sync partition data
         syncPartition();
     }
     fflush(filePtr);
-    
+
     return errorCode;
 }
 
@@ -326,4 +335,42 @@ FILE* seekToBlock(FILE *filePtr, int block) {
 
     fseek(filePtr, offset, SEEK_SET);
     return filePtr;
+}
+
+char* readFile(int file) {
+    char* output = (char*) malloc(localPartition.block_size * localFAT[file].file_length);
+    memset(output, '\0', sizeof(output));
+
+    // The operation will reset the current_location so that files can be read after being written
+    // The current_location should end as the same as how it started
+    localFAT[file].current_location = 0;
+
+    for (int i = 0; i < localFAT[file].file_length; i++) {
+        char *block = readBlock(file);
+        localFAT[file].current_location++;
+
+        strcat(output, block);
+        free(block);
+    }
+
+    return output;   
+}
+
+char* readBlock(int file) {
+    char *output = (char*) malloc(localPartition.block_size);
+    memset(output, '\0', sizeof(output));
+
+    FILE *filePtr = getFilePointer(file);
+    filePtr = seekToBlock(filePtr, localFAT[file].blockPtrs[localFAT[file].current_location]);
+    
+    // Copy block into block_buffer
+    for (int i = 0; i < localPartition.block_size; i++) {
+        block_buffer[i] = fgetc(filePtr);
+    }
+
+    // Copy non '0' characters into output
+    int dataLength = (strcspn(block_buffer, "0") < localPartition.block_size) ? strcspn(block_buffer, "0") : localPartition.block_size;
+    strncpy(output, block_buffer, dataLength);
+
+    return output;
 }

@@ -188,8 +188,32 @@ int write(char** words) {
     return errorCode;
 } 
 
-int read() {
-    printf("read() not implemented\n");
+// The read command opens the file
+// and assigns resulting string to variable in shell memory.
+int read(char** words) {
+    
+    // Check argument count. Format: read file VAR
+    if (!words[1] || !words[2]) return EINVAL;
+
+    int fid = openfile(words[1]);
+    
+    char *fileContents = readFile(fid);
+
+    char **setWords = (char**) malloc(sizeof(char*) * 3);
+    setWords[0] = strdup("set");
+    setWords[1] = strdup(words[2]);
+    setWords[2] = strdup(fileContents);
+    
+    SM__set(setWords);
+    
+    // Clean up malloced strings
+    free(setWords[0]);
+    free(setWords[1]);
+    free(setWords[2]);
+    free(setWords);
+    free(fileContents);
+    
+    return EXIT_SUCCESS;
 }
 
 char** parseInput(char ui[]) {
@@ -227,7 +251,6 @@ void cleanupWords(char** words) {
         words[i] = NULL;
     }
     free(words); 
-    words = NULL;
 }
 
 // Checks if the sequence of words 

@@ -29,6 +29,11 @@
     // Assumes that file is opened.
     int writeBlock(int file, char *data);
 
+    // Reads all the blocks of the given file 
+    // (represented as FAT index) and returns
+    // a newly allocated string containing file contents
+    char* readFile(int file);
+
 
 #define MAX_BLOCK_COUNT 200
 #define MAX_BLOCK_SIZE UINT_MAX
